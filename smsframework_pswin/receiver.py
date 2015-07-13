@@ -36,7 +36,7 @@ def im():
                          .format(n, req)
 
     # Parse date
-    rtime = datetime.utcnow()
+    rtime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     # Message encoding
     req['TXT'] = urllib.unquote_plus(req['TXT'])
