@@ -1,4 +1,4 @@
-SMSframework Clickatell Provider
+SMSframework PSWinCom Provider
 ================================
 
 [PSWin](https://wiki.pswin.com/) Provider for [smsframework](https://pypi.python.org/pypi/smsframework/).
