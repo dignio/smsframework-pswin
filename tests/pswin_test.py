@@ -175,7 +175,7 @@ class PswinProviderTest(unittest.TestCase):
         self.gw.onStatus += receiver
 
         with self.app.test_client() as c:
-            # Status 1: artificial, delivered
+            # Status 1: GET artificial, delivered
             res = c.get('/a/b/main/status'
                         '?RCV=123'
                         '&REF=456'
@@ -188,11 +188,38 @@ class PswinProviderTest(unittest.TestCase):
             self.assertEqual(st.provider, 'main')
             self.assertEqual(st.status, status.Delivered.status)
 
-            # # Status 2: artificial, error
+            # Status 2: GET artificial, error
             res = c.get('/a/b/main/status'
                         '?RCV=123'
                         '&REF=456'
                         '&STATE=UNDELIV')
+            self.assertEqual(res.status_code, 200)
+            self.assertEqual(len(statuses), 1)
+            st = statuses.pop()
+            self.assertEqual(st.msgid, '456')
+            self.assertEqual(st.provider, 'main')
+            self.assertEqual(st.status, status.Undelivered.status)
+
+            # Status 3: POST artificial, delivered
+            res = c.post('/a/b/main/status', data={
+                "RCV": "123",
+                "REF": "456",
+                "STATE": "DELIVRD",
+                "DELIVERYTIME": "201507090000"
+            })
+            self.assertEqual(res.status_code, 200)
+            self.assertEqual(len(statuses), 1)
+            st = statuses.pop()
+            self.assertEqual(st.msgid, '456')
+            self.assertEqual(st.provider, 'main')
+            self.assertEqual(st.status, status.Delivered.status)
+
+            # Status 4: POST artificial, error
+            res = c.post('/a/b/main/status', data={
+                "RCV": "123",
+                "REF": "456",
+                "STATE": "UNDELIV"
+            })
             self.assertEqual(res.status_code, 200)
             self.assertEqual(len(statuses), 1)
             st = statuses.pop()
