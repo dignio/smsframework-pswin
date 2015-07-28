@@ -26,12 +26,11 @@ def im():
         * RCV: Receiver number
         * SND: Sender number
         * TXT: Message data
-        * REF: Delivery report reference
     """
     req = _merge_request(request)
 
     # Check fields
-    for n in ('RCV', 'SND', 'TXT', 'REF'):
+    for n in ('RCV', 'SND', 'TXT'):
         assert n in req, 'PSWin sent a message with missing "{}" field: {}'\
                          .format(n, req)
 
@@ -45,7 +44,6 @@ def im():
     message = IncomingMessage(
         src=req['SND'],
         body=req['TXT'],  # CHECKME: test that unicode works
-        msgid=req['REF'],
         dst=req['RCV'],
         rtime=rtime
     )
