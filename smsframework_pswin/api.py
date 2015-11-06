@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 import re
+import binascii
 
 
 class PswinApiError(RuntimeError):
@@ -51,8 +52,11 @@ class PswinHttpApi(object):
             # Raise correct error
             raise PswinApiError(code=1, message='ERROR')
 
-    def sendmsg(self, to, text, **params):
+    def sendmsg(self, to, text, is_hex=False, **params):
         """ Send SMS message """
         params['RCV'] = to
-        params['TXT'] = text
+        if is_hex:
+            params['HEX'] = binascii.hexlify(text)
+        else:
+            params['TXT'] = text
         response = self.api_request(**params)
