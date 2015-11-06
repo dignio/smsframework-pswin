@@ -38,7 +38,7 @@ def im():
     rtime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     # Message encoding
-    # req['TXT'] = urllib.unquote_plus(req['TXT'])
+    req['TXT'] = urllib.unquote_plus(req['TXT'])
 
     # IncomingMessage
     message = IncomingMessage(
