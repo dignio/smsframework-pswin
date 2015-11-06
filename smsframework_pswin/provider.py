@@ -18,7 +18,7 @@ class PswinProvider(IProvider):
         self.api = PswinHttpApi(user, password, https)
         super(PswinProvider, self).__init__(gateway, name)
 
-    def send(self, message, is_hex=False):
+    def send(self, message):
         """ Send a message
 
             :type message: smsframework.data.OutgoingMessage.OutgoingMessage
@@ -33,12 +33,8 @@ class PswinProvider(IProvider):
         params.update(message.provider_params)
 
         try:
-            if is_hex:
-                message.msgid = \
-                    self.api.sendmsg(message.dst, message.body, True, **params)
-            else:
-                message.msgid = \
-                    self.api.sendmsg(message.dst, message.body, **params)
+            message.msgid = \
+                self.api.sendmsg(message.dst, message.body, **params)
             return message
 
         except HTTPError as e:
