@@ -1,7 +1,7 @@
 import urllib
 from datetime import datetime
 
-from flask import Blueprint
+from flask import Blueprint, abort
 from flask.globals import request, g
 
 from smsframework.data import IncomingMessage
@@ -30,9 +30,10 @@ def im():
     req = _merge_request(request)
 
     # Check fields
-    for n in ('RCV', 'SND', 'TXT'):
-        assert n in req, 'PSWin sent a message with missing "{}" field: {}'\
-                         .format(n, req)
+    required_fields = ('RCV', 'SND', 'TXT')
+    for field in required_fields:
+        if field not in req:
+            abort(400, 'PSWin sent a message with missing "{}" field'.format(field))
 
     # Parse date
     rtime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
