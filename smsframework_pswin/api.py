@@ -16,7 +16,7 @@ class PswinApiError(RuntimeError):
 class PswinHttpApi(object):
     """ PSWin HTTP API client """
 
-    def __init__(self, user, password, https=False):
+    def __init__(self, user, password, hostname=None, https=False):
         """ Create an authenticated client
             :type https: bool
             :param https: Use HTTPS protocol for requests?
@@ -26,7 +26,7 @@ class PswinHttpApi(object):
             PW=password
         )
         self._https = https
-        self._hostname = 'simple.pswin.com'
+        self._hostname = hostname or 'simple.pswin.com'
 
     def _api_request(self, **params):
         """ Make an API request and return the response

@@ -8,14 +8,14 @@ from urllib2 import URLError, HTTPError
 class PswinProvider(IProvider):
     """ PSWin provider """
 
-    def __init__(self, gateway, name, user, password, https=False):
+    def __init__(self, gateway, name, user, password, hostname=None, https=False):
         """ Configure PSWin provider
 
             :param user: Account username
             :param password: Account password
             :param https: Use HTTPS for outgoing messages?
         """
-        self.api = PswinHttpApi(user, password, https)
+        self.api = PswinHttpApi(user, password, https, hostname)
         super(PswinProvider, self).__init__(gateway, name)
 
     def send(self, message):

@@ -37,6 +37,7 @@ gateway = Gateway()
 gateway.add_provider('pswin', PswinProvider,
     user='dignio',
     password='123',
+    hostname='foo.pswin.com', // Defaults to 'simple.pswin.com'
     https=True
 )
 ```
@@ -48,6 +49,7 @@ Source: /smsframework_pswin/provider.py
 
 * `user: str`: Account username
 * `password: str`: Account password
+* `hostname: str`: Provider hostname
 * `https: bool`: Use HTTPS for outgoing messages? Default: `False`
 
 
