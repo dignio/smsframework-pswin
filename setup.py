@@ -11,7 +11,7 @@ setup(
     url='https://github.com/dignio/py-smsframework-pswin',
     license='MIT',
     description="SMS framework: PSWin provider",
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
     keywords=['sms', 'message', 'notification', 'receive', 'send', 'pswin'],
 
     packages=['smsframework_pswin'],
