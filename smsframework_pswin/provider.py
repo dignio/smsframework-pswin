@@ -15,7 +15,7 @@ class PswinProvider(IProvider):
             :param password: Account password
             :param https: Use HTTPS for outgoing messages?
         """
-        self.api = PswinHttpApi(user, password, https, hostname)
+        self.api = PswinHttpApi(user, password, hostname, https)
         super(PswinProvider, self).__init__(gateway, name)
 
     def send(self, message):

@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     # http://pythonhosted.org/setuptools/setuptools.html
     name='smsframework-pswin',
-    version='0.0.4',
+    version='0.0.5',
     author='Dignio',
 
     url='https://github.com/dignio/py-smsframework-pswin',
