@@ -40,12 +40,12 @@ def im():
     rtime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     # Message encoding
-    # req['TXT'] = urllib.unquote_plus(req['TXT'])
+    req['TXT'] = urllib.unquote_plus(req['TXT'])
 
     # IncomingMessage
     message = IncomingMessage(
         src=req['SND'],
-        body=req['TXT'],  # CHECKME: test that unicode works
+        body=req['TXT'],
         msgid=req.get('REF'),
         dst=req['RCV'],
         rtime=rtime

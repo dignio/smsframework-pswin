@@ -134,7 +134,7 @@ class PswinProviderTest(unittest.TestCase):
 
             # Message 4: POST real, unicode
             res = c.post('/a/b/main/im', data={
-                "REF": 1, "SND": "123", "RCV": "456", "TXT": "hello+there"
+                "REF": 1, "SND": "123", "RCV": "456", "TXT": "Hei+p%e5+deg+%d8%d8%d8"
             })
             self.assertEqual(res.status_code, 200)
             self.assertEqual(len(messages), 1)
@@ -143,7 +143,7 @@ class PswinProviderTest(unittest.TestCase):
             self.assertEqual(message.msgid, '1')
             self.assertEqual(message.src, '123')
             self.assertEqual(message.dst, '456')
-            self.assertEqual(message.body, 'hello there')
+            self.assertEqual(message.body, u'Hei på deg ØØØ')
 
             # Message 5: POST real, non-unicode
             res = c.post('/a/b/main/im', data={
