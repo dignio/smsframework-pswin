@@ -28,6 +28,9 @@ class PswinProvider(IProvider):
         params = {}
         if message.src:
             params['SND'] = message.src
+        # senderId overrides source number.
+        if message.provider_options.senderId:
+            params['SND'] = message.provider_options.senderId
         if message.provider_options.status_report:
             params['RCPREQ'] = 'Y'
         params.update(message.provider_params)

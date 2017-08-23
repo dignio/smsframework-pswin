@@ -21,6 +21,8 @@ class PswinProviderTest(unittest.TestCase):
         gw.add_provider('main', PswinProvider,
                         user='user', password='password')
 
+        self.requests = []
+
         # Flask
         app = self.app = Flask(__name__)
 
@@ -30,6 +32,8 @@ class PswinProviderTest(unittest.TestCase):
     def _mock_response(self, status_code):
         """ Monkey-patch PswinHttpApi so it returns a predefined response """
         def _api_request(**params):
+            self.requests.append(params)
+
             response = Response()
             response.status_code = status_code
             return response
@@ -59,6 +63,16 @@ class PswinProviderTest(unittest.TestCase):
                           OutgoingMessage('+123456',
                                           'hey',
                                           provider='main'))
+
+    def test_senderId(self):
+        gw = self.gw
+
+        self._mock_response(200)  # OK
+        message = OutgoingMessage('+123456', 'hey', provider='main')
+        message.options(senderId='Fake sender')
+        gw.send(message)
+        request = self.requests.pop()
+        self.assertEqual('Fake sender', request['SND'])
 
     def test_receive_message(self):
         """ Test message receipt """
