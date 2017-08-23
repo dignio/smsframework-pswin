@@ -26,6 +26,7 @@ def im():
         * RCV: Receiver number
         * SND: Sender number
         * TXT: Message data
+        * REF: Delivery report reference
     """
     req = _merge_request(request)
 
@@ -45,6 +46,7 @@ def im():
     message = IncomingMessage(
         src=req['SND'],
         body=req['TXT'],  # CHECKME: test that unicode works
+        msgid=req.get('REF'),
         dst=req['RCV'],
         rtime=rtime
     )

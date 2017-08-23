@@ -88,7 +88,7 @@ class PswinProviderTest(unittest.TestCase):
         with self.app.test_client() as c:
             # Message 1: GET artificial
             res = c.get('/a/b/main/im'
-                        '?REF=1'
+                        '?REF=foobar'
                         '&SND=123'
                         '&RCV=456'
                         '&TXT=hello+there')
@@ -96,7 +96,7 @@ class PswinProviderTest(unittest.TestCase):
             self.assertEqual(len(messages), 1)
             message = messages.pop()
             self.assertEqual(message.provider, 'main')
-            self.assertEqual(message.msgid, '1')
+            self.assertEqual(message.msgid, 'foobar')
             self.assertEqual(message.src, '123')
             self.assertEqual(message.dst, '456')
             self.assertEqual(message.body, 'hello there')
