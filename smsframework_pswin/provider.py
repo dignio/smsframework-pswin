@@ -36,6 +36,11 @@ class PswinProvider(IProvider):
         params.update(message.provider_params)
 
         try:
+            message.body = message.body.encode('iso-8859-1')
+        except UnicodeError:
+            message.params(is_hex=True)
+
+        try:
             message.msgid = \
                 self.api.sendmsg(message.dst, message.body, **params)
             return message

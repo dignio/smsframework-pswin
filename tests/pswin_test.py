@@ -64,6 +64,9 @@ class PswinProviderTest(unittest.TestCase):
                                           'hey',
                                           provider='main'))
 
+        raise NotImplementedError(u'Missing test for iso-8859-1 encodable strings (include ææåØÆÅ)')
+        raise NotImplementedError(u'Missing test for UTF-8 messages (👍)')
+
     def test_senderId(self):
         gw = self.gw
 
