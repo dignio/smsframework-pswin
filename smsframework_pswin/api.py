@@ -6,6 +6,9 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
+# Content types, https://wiki.pswin.com/Message%20types.ashx
+CT_UCS2 = 9
+
 
 class PswinApiError(RuntimeError):
     def __init__(self, code, message):
@@ -60,6 +63,7 @@ class PswinHttpApi(object):
         params['RCV'] = to
         if params.get('is_hex', False):
             params['HEX'] = binascii.hexlify(text.encode('utf-16-be'))
+            params['CT'] = CT_UCS2
         else:
             params['TXT'] = text
         response = self.api_request(**params)
