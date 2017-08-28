@@ -64,9 +64,6 @@ class PswinProviderTest(unittest.TestCase):
                                           'hey',
                                           provider='main'))
 
-        raise NotImplementedError(u'Missing test for iso-8859-1 encodable strings (include ææåØÆÅ)')
-        raise NotImplementedError(u'Missing test for UTF-8 messages (👍)')
-
     def test_senderId(self):
         gw = self.gw
 
@@ -243,3 +240,32 @@ class PswinProviderTest(unittest.TestCase):
             self.assertEqual(st.msgid, '456')
             self.assertEqual(st.provider, 'main')
             self.assertEqual(st.status, status.Undelivered.status)
+
+    def test_gsm7_encoding_invalid_character(self):
+        message = OutgoingMessage('+123456', 'Vamos a aprender chino \xe7\x8e\xa9.', provider='main')
+        self._mock_response(200)
+        self.gw.send(message)
+        self.assertIn('is_hex', message.provider_params)
+
+        message = OutgoingMessage('+123456', '\xD7\x9E\xD7\x94\x20\xD7\xA7\xD7\x95\xD7\xA8\xD7\x94\x3F', provider='main')
+        self._mock_response(200)
+        self.gw.send(message)
+        self.assertIn('is_hex', message.provider_params)
+
+    def test_gsm7_valid_characters(self):
+        message = OutgoingMessage('+654321', 'Æ E A Å Edø.', provider='main')
+        self._mock_response(200)
+        self.gw.send(message)
+        self.assertNotIn('is_hex', message.provider_params)
+
+        message = OutgoingMessage('+654321', 'RaLejaLe hemmat i høssølæssom å naumøLa spikkjipørse.', provider='main')
+        self._mock_response(200)
+        self.gw.send(message)
+        self.assertNotIn('is_hex', message.provider_params)
+
+        message = OutgoingMessage('+654321', 'Ñoño Yáñez come ñame en las mañanas con el niño.', provider='main')
+        self._mock_response(200)
+        self.gw.send(message)
+        self.assertNotIn('is_hex', message.provider_params)
+
+
