@@ -246,6 +246,7 @@ class PswinProviderTest(unittest.TestCase):
         self._mock_response(200)
         self.gw.send(message)
         self.assertIn('is_hex', message.provider_params)
+        self.assertEqual(9, message.provider_params['CT'])
 
         message = OutgoingMessage('+123456', '\xD7\x9E\xD7\x94\x20\xD7\xA7\xD7\x95\xD7\xA8\xD7\x94\x3F', provider='main')
         self._mock_response(200)
