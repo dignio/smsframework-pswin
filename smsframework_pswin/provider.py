@@ -35,16 +35,16 @@ class PswinProvider(IProvider):
             params['RCPREQ'] = 'Y'
 
         try:
-            message.body = message.body.encode('iso-8859-1')
-            message.params(CT=1)
+            body = message.body.encode('iso-8859-1')
         except UnicodeError:
-            message.params(is_hex=True, CT=9)
+            body = message.body.encode('utf-16-be')
+            message.params(is_hex=True)
 
         params.update(message.provider_params)
 
         try:
             message.msgid = \
-                self.api.sendmsg(message.dst, message.body, **params)
+                self.api.sendmsg(message.dst, body, **params)
             return message
 
         except HTTPError as e:

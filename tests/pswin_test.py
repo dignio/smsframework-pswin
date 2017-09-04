@@ -271,6 +271,9 @@ class PswinProviderTest(unittest.TestCase):
             OutgoingMessage('+654321', u'RaLejaLe hemmat i høssølæssom å naumøLa spikkjipørse.',
                             provider='main'))
 
+        # The modified OutgoingMessage will be returned in the http response.
+        # Ensure that OutgoingMessage.body can still be jsonified:
+        sent_message_2.body.decode('utf-8')
 
         request_2 = self.requests.pop()
         self.assertEquals(CT_PLAIN_TEXT, request_2['CT'])

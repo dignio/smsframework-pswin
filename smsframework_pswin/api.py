@@ -7,6 +7,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 # Content types, https://wiki.pswin.com/Message%20types.ashx
+CT_PLAIN_TEXT = 1
 CT_UCS2 = 9
 
 
@@ -62,8 +63,9 @@ class PswinHttpApi(object):
         """ Send SMS message """
         params['RCV'] = to
         if params.get('is_hex', False):
-            params['HEX'] = binascii.hexlify(text.encode('utf-16-be'))
+            params['HEX'] = binascii.hexlify(text)
             params['CT'] = CT_UCS2
         else:
             params['TXT'] = text
+            params['CT'] = CT_PLAIN_TEXT
         response = self.api_request(**params)
