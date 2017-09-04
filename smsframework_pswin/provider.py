@@ -33,13 +33,14 @@ class PswinProvider(IProvider):
             params['SND'] = message.provider_options.senderId
         if message.provider_options.status_report:
             params['RCPREQ'] = 'Y'
-        params.update(message.provider_params)
 
         try:
             message.body = message.body.encode('iso-8859-1')
             message.params(CT=1)
         except UnicodeError:
             message.params(is_hex=True, CT=9)
+
+        params.update(message.provider_params)
 
         try:
             message.msgid = \
