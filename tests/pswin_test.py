@@ -11,6 +11,7 @@ from smsframework.providers import NullProvider
 from smsframework_pswin import PswinProvider
 
 from smsframework_pswin import error, status
+from smsframework_pswin.api import CT_UCS2, CT_PLAIN_TEXT
 
 
 class PswinProviderTest(unittest.TestCase):
@@ -246,27 +247,41 @@ class PswinProviderTest(unittest.TestCase):
         self._mock_response(200)
         self.gw.send(message)
         self.assertIn('is_hex', message.provider_params)
-        self.assertEqual(9, message.provider_params['CT'])
+
+        request = self.requests.pop()
+        self.assertEqual(CT_UCS2, request['CT'])
 
         message = OutgoingMessage('+123456', '\xD7\x9E\xD7\x94\x20\xD7\xA7\xD7\x95\xD7\xA8\xD7\x94\x3F', provider='main')
         self._mock_response(200)
         self.gw.send(message)
-        self.assertIn('is_hex', message.provider_params)
+
+        request = self.requests.pop()
+        self.assertEquals(CT_UCS2, request['CT'])
+        self.assertEquals('05de05d4002005e705d505e805d4003f', request['HEX'])
 
     def test_gsm7_valid_characters(self):
-        message = OutgoingMessage('+654321', 'Æ E A Å Edø.', provider='main')
         self._mock_response(200)
-        self.gw.send(message)
-        self.assertNotIn('is_hex', message.provider_params)
+        sent_message = self.gw.send(OutgoingMessage('+654321', u'Æ E A Å Edø.', provider='main'))
+        self.assertNotIn('is_hex', sent_message.provider_params)
+        request_1 = self.requests.pop()
+        self.assertEquals('\xc6 E A \xc5 Ed\xf8.', request_1['TXT'])
 
-        message = OutgoingMessage('+654321', 'RaLejaLe hemmat i høssølæssom å naumøLa spikkjipørse.', provider='main')
         self._mock_response(200)
-        self.gw.send(message)
-        self.assertNotIn('is_hex', message.provider_params)
+        sent_message_2 = self.gw.send(
+            OutgoingMessage('+654321', u'RaLejaLe hemmat i høssølæssom å naumøLa spikkjipørse.',
+                            provider='main'))
 
-        message = OutgoingMessage('+654321', 'Ñoño Yáñez come ñame en las mañanas con el niño.', provider='main')
+
+        request_2 = self.requests.pop()
+        self.assertEquals(CT_PLAIN_TEXT, request_2['CT'])
+        self.assertEquals('RaLejaLe hemmat i h\xf8ss\xf8l\xe6ssom \xe5 naum\xf8La spikkjip\xf8rse.',
+                          request_2['TXT'])
+
         self._mock_response(200)
-        self.gw.send(message)
-        self.assertNotIn('is_hex', message.provider_params)
-
-
+        sent_message_3 = self.gw.send(
+            OutgoingMessage('+654321', u'Ñoño Yáñez come ñame en las mañanas con el niño.',
+                            provider='main'))
+        self.assertNotIn('is_hex', sent_message_3.provider_params)
+        request_3 = self.requests.pop()
+        self.assertEquals('\xd1o\xf1o Y\xe1\xf1ez come \xf1ame en las ma\xf1anas con el ni\xf1o.',
+                          request_3['TXT'])
