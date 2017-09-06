@@ -40,7 +40,8 @@ def im():
     rtime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     # Message encoding
-    req['TXT'] = urllib.unquote_plus(req['TXT'])
+    # PsWin docs say that messages are url-encoded, but spaces are at least not converted to +.
+    req['TXT'] = urllib.unquote(req['TXT'])
 
     # IncomingMessage
     message = IncomingMessage(
