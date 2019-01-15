@@ -1,8 +1,14 @@
+# -*- coding: utf-8 -*-
+
 from smsframework import IProvider, exc
 from . import error
 from . import status
 from .api import PswinHttpApi, PswinApiError
-from urllib2 import URLError, HTTPError
+
+try:  # Py3
+    from urllib.request import URLError, HTTPError
+except ImportError:  # Py2
+    from urllib2 import URLError, HTTPError
 
 
 class PswinProvider(IProvider):
@@ -35,6 +41,9 @@ class PswinProvider(IProvider):
             params['RCPREQ'] = 'Y'
 
         try:
+            # Here we attempt to encode the message in iso-8859-1. Only if this fails,
+            # we use the UCS2 encoding.
+            # This approach tries to fit as many characters into one SMS message as possible
             body = message.body.encode('iso-8859-1')
         except UnicodeError:
             body = message.body.encode('utf-16-be')
@@ -48,11 +57,11 @@ class PswinProvider(IProvider):
             return message
 
         except HTTPError as e:
-            raise exc.MessageSendError(e.message)
+            raise exc.MessageSendError(str(e))
         except URLError as e:
-            raise exc.ConnectionError(e.message)
+            raise exc.ConnectionError(str(e))
         except PswinApiError as e:
-            raise error.PswinProviderError(e.code, e.message)
+            raise error.PswinProviderError(e.code, str(e))
 
     def make_receiver_blueprint(self):
         """ Create the receiver blueprint

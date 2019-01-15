@@ -44,7 +44,7 @@ class PswinProviderTest(unittest.TestCase):
     def test_blueprints(self):
         """ Test blueprints """
         self.assertEqual(
-            self.gw.receiver_blueprints().keys(),
+            list(self.gw.receiver_blueprints().keys()),
             ['main']
         )
 
@@ -102,7 +102,7 @@ class PswinProviderTest(unittest.TestCase):
             self.assertEqual(message.dst, '456')
             self.assertEqual(message.body, 'hello there')
 
-            # Message 2: GET real, non-unicode
+            # Message 2: GET artificial, non-unicode
             res = c.get('/a/b/main/im'
                         '?SND=380660000000'
                         '&RCV=491700000000'
@@ -117,66 +117,32 @@ class PswinProviderTest(unittest.TestCase):
             self.assertEqual(message.dst, '491700000000')
             self.assertEqual(message.body, 'Hi, man')
 
-            # Message 3: GET real, unicode
-            res = c.get('/a/b/main/im'
-                        '?SND=380660000000'
-                        '&RCV=491700000000'
-                        '&TXT=%D0%9F%D1%80%D0%B8%D0%B2%D0%B5%D1%82%2C%20%'
-                        'D0%B6%D0%BE%D0%BF%D0%B0!'
-                        '&REF=c6b1e0eb9d6b8d549621235aaf089a26')
+            # Message 4: POST real, unicode, dumped from PSWin by Dag in January 2019
+            res = c.post('/a/b/main/im',
+                         headers={'Content-Type': 'application/x-www-form-urlencoded',},
+                         data=b'ID=1&SND=4748043043&RCV=4759443671&TXT=Hei+p%e5+deg+%d8%d8%d8&NET=242:00'
+                         # Message: Hei på deg ØØØ
+                         )
             self.assertEqual(res.status_code, 200)
             self.assertEqual(len(messages), 1)
             message = messages.pop()
             self.assertEqual(message.provider, 'main')
-            self.assertEqual(message.msgid, 'c6b1e0eb9d6b8d549621235aaf089a26')
-            self.assertEqual(message.src, '380660000000')
-            self.assertEqual(message.dst, '491700000000')
-            self.assertEqual(message.body, u'Привет, жопа!')
-
-            # Message 4: POST real, unicode
-            res = c.post('/a/b/main/im', data={
-                "REF": 1, "SND": "123", "RCV": "456", "TXT": "Hei p%e5 deg %d8%d8%d8"
-            })
-            self.assertEqual(res.status_code, 200)
-            self.assertEqual(len(messages), 1)
-            message = messages.pop()
-            self.assertEqual(message.provider, 'main')
-            self.assertEqual(message.msgid, '1')
-            self.assertEqual(message.src, '123')
-            self.assertEqual(message.dst, '456')
+            self.assertEqual(message.msgid, None)
+            self.assertEqual(message.src, '4748043043')
+            self.assertEqual(message.dst, '4759443671')
             self.assertEqual(message.body, u'Hei på deg ØØØ')
+            self.assertEqual(message.meta['NET'], '242:00')
 
-            # Message 5: POST real, non-unicode
-            res = c.post('/a/b/main/im', data={
-                "SND": "380660000000",
-                "RCV": "491700000000",
-                "TXT": "Hi%2C man",
-                "REF": "c6b1e0eb9d6b8d549621235aaf089a26"
-            })
-            self.assertEqual(res.status_code, 200)
-            self.assertEqual(len(messages), 1)
+            # Message 5: POST real, unicode, russian, dumped from PSWin by Dag in January 2019
+            # NOTE: PSWin can't handle unicode with incoming messages!
+            res = c.post('/a/b/main/im',
+                         headers={'Content-Type': 'application/x-www-form-urlencoded',},
+                         data=b'ID=1&SND=4748043043&RCV=4759443671&TXT=%3f%3f%3f%3f%3f%3f&NET=242:00'
+                         # Message: Привет
+                         )
             message = messages.pop()
-            self.assertEqual(message.provider, 'main')
-            self.assertEqual(message.msgid, 'c6b1e0eb9d6b8d549621235aaf089a26')
-            self.assertEqual(message.src, '380660000000')
-            self.assertEqual(message.dst, '491700000000')
-            self.assertEqual(message.body, 'Hi, man')
+            self.assertEqual(message.body, u'??????')  # Look! PSWin can't receive Unicode!
 
-            # Message 6: POST real, unicode
-            res = c.post('/a/b/main/im', data={
-                "SND": "380660000000",
-                "RCV": "491700000000",
-                "TXT": "Привет, жопа!",
-                "REF": "c6b1e0eb9d6b8d549621235aaf089a26"
-            })
-            self.assertEqual(res.status_code, 200)
-            self.assertEqual(len(messages), 1)
-            message = messages.pop()
-            self.assertEqual(message.provider, 'main')
-            self.assertEqual(message.msgid, 'c6b1e0eb9d6b8d549621235aaf089a26')
-            self.assertEqual(message.src, '380660000000')
-            self.assertEqual(message.dst, '491700000000')
-            self.assertEqual(message.body, u'Привет, жопа!')
 
     def test_receive_status(self):
         """ Test status receipt """
@@ -243,7 +209,7 @@ class PswinProviderTest(unittest.TestCase):
             self.assertEqual(st.status, status.Undelivered.status)
 
     def test_gsm7_encoding_invalid_character(self):
-        message = OutgoingMessage('+123456', 'Vamos a aprender chino \xe7\x8e\xa9.', provider='main')
+        message = OutgoingMessage('+123456', u'Vamos a aprender chino \u73a9.', provider='main')
         self._mock_response(200)
         self.gw.send(message)
         self.assertIn('is_hex', message.provider_params)
@@ -251,20 +217,20 @@ class PswinProviderTest(unittest.TestCase):
         request = self.requests.pop()
         self.assertEqual(CT_UCS2, request['CT'])
 
-        message = OutgoingMessage('+123456', '\xD7\x9E\xD7\x94\x20\xD7\xA7\xD7\x95\xD7\xA8\xD7\x94\x3F', provider='main')
+        message = OutgoingMessage('+123456', u'\u05de\u05d4 \u05e7\u05d5\u05e8\u05d4?', provider='main')
         self._mock_response(200)
         self.gw.send(message)
 
         request = self.requests.pop()
         self.assertEquals(CT_UCS2, request['CT'])
-        self.assertEquals('05de05d4002005e705d505e805d4003f', request['HEX'])
+        self.assertEquals(b'05de05d4002005e705d505e805d4003f', request['HEX'])
 
     def test_gsm7_valid_characters(self):
         self._mock_response(200)
         sent_message = self.gw.send(OutgoingMessage('+654321', u'Æ E A Å Edø.', provider='main'))
         self.assertNotIn('is_hex', sent_message.provider_params)
         request_1 = self.requests.pop()
-        self.assertEquals('\xc6 E A \xc5 Ed\xf8.', request_1['TXT'])
+        self.assertEquals(b'\xc6 E A \xc5 Ed\xf8.', request_1['TXT'])
 
         self._mock_response(200)
         sent_message_2 = self.gw.send(
@@ -273,11 +239,11 @@ class PswinProviderTest(unittest.TestCase):
 
         # The modified OutgoingMessage will be returned in the http response.
         # Ensure that OutgoingMessage.body can still be jsonified:
-        sent_message_2.body.decode('utf-8')
+        sent_message_2.body.encode('utf-8')
 
         request_2 = self.requests.pop()
         self.assertEquals(CT_PLAIN_TEXT, request_2['CT'])
-        self.assertEquals('RaLejaLe hemmat i h\xf8ss\xf8l\xe6ssom \xe5 naum\xf8La spikkjip\xf8rse.',
+        self.assertEquals(b'RaLejaLe hemmat i h\xf8ss\xf8l\xe6ssom \xe5 naum\xf8La spikkjip\xf8rse.',
                           request_2['TXT'])
 
         self._mock_response(200)
@@ -286,5 +252,5 @@ class PswinProviderTest(unittest.TestCase):
                             provider='main'))
         self.assertNotIn('is_hex', sent_message_3.provider_params)
         request_3 = self.requests.pop()
-        self.assertEquals('\xd1o\xf1o Y\xe1\xf1ez come \xf1ame en las ma\xf1anas con el ni\xf1o.',
+        self.assertEquals(b'\xd1o\xf1o Y\xe1\xf1ez come \xf1ame en las ma\xf1anas con el ni\xf1o.',
                           request_3['TXT'])

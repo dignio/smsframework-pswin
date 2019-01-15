@@ -1,3 +1,6 @@
+[![Build Status](https://api.travis-ci.org/dignio/py-smsframework-pswin.png?branch=master)](https://travis-ci.org/dignio/py-smsframework-pswin)
+[![Pythons](https://img.shields.io/badge/python-2.7%20%7C%203.4%E2%80%933.7%20%7C%20pypy-blue.svg)](.travis.yml)
+
 SMSframework PSWinCom Provider
 ================================
 
@@ -37,7 +40,7 @@ gateway = Gateway()
 gateway.add_provider('pswin', PswinProvider,
     user='dignio',
     password='123',
-    hostname='foo.pswin.com', // Defaults to 'simple.pswin.com'
+    hostname='foo.pswin.com',  # Defaults to 'simple.pswin.com'
     https=True
 )
 ```

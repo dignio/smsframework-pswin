@@ -1,4 +1,5 @@
-import urllib
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 
 from flask import Blueprint, abort
@@ -6,6 +7,7 @@ from flask.globals import request, g
 
 from smsframework.data import IncomingMessage
 from .status import PswinMessageStatus
+
 
 bp = Blueprint('smsframework-pswin', __name__, url_prefix='/')
 
@@ -28,6 +30,10 @@ def im():
         * TXT: Message data
         * REF: Delivery report reference
     """
+    # PSWin doesn't actually use unicode; so tell flask to use the proper charset when decoding values
+    request.charset = 'iso-8859-1'
+
+    # Merge GET and POST
     req = _merge_request(request)
 
     # Check fields
@@ -39,17 +45,14 @@ def im():
     # Parse date
     rtime = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Message encoding
-    # PsWin docs say that messages are url-encoded, but spaces are at least not converted to +.
-    req['TXT'] = urllib.unquote(req['TXT'])
-
     # IncomingMessage
     message = IncomingMessage(
         src=req['SND'],
         body=req['TXT'],
         msgid=req.get('REF'),
         dst=req['RCV'],
-        rtime=rtime
+        rtime=rtime,
+        meta=dict(NET=req.get('NET', None))
     )
 
     # Process it
@@ -72,6 +75,10 @@ def status():
                  should be considered a positive delivery acknowledgement.
         * DELIVERYTIME: Time of message delivery (yyyyMMddHHmm always in CET)
     """
+    # PSWin doesn't actually use unicode; so tell flask to use the proper charset when decoding values
+    request.charset = 'iso-8859-1'
+
+    # Merge GET & POST
     req = _merge_request(request)
 
     # Check fields

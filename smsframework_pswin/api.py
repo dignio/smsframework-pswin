@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import requests
-import re
 import binascii
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
 
 # Content types, https://wiki.pswin.com/Message%20types.ashx
 CT_PLAIN_TEXT = 1
@@ -69,3 +66,4 @@ class PswinHttpApi(object):
             params['TXT'] = text
             params['CT'] = CT_PLAIN_TEXT
         response = self.api_request(**params)
+        # TODO: analyze response, see if everything went well
